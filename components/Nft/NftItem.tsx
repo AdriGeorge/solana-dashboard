@@ -1,10 +1,11 @@
 import React from 'react';
-import {Nft} from '@metaplex-foundation/js';
+import {Nft, PublicKey} from '@metaplex-foundation/js';
 import styles from '../../styles/NftDisplay.module.css';
 import Image from 'next/image';
 
 interface NFTItemProps {
   nft: {
+    address: PublicKey;
     json: {
       name?: string;
       description?: string;
@@ -17,6 +18,11 @@ const NFTItem: React.FC<NFTItemProps> = ({nft}) => {
   const imageAlt = nft.json?.name || 'NFT Image';
   const imageDescription = nft.json?.description || 'No description available';
 
+  const nftAddress = nft.address.toString();
+  const explorerUrl = nftAddress
+    ? `https://solscan.io/token/${nftAddress}?cluster=devnet`
+    : '#';
+
   return (
     <div className={styles.nftItem}>
       {imageUrl && (
@@ -28,8 +34,13 @@ const NFTItem: React.FC<NFTItemProps> = ({nft}) => {
           className={styles.nftImage}
         />
       )}
+
       <h3>{imageAlt}</h3>
+
       <p>{imageDescription}</p>
+      <a href={explorerUrl} target='_blank' rel='noopener noreferrer'>
+        <p>See on explorer</p>
+      </a>
     </div>
   );
 };
