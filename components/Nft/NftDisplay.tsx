@@ -1,80 +1,61 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {useWallet} from '@solana/wallet-adapter-react';
-import {Connection, PublicKey} from '@solana/web3.js';
 import styles from '../../styles/NftDisplay.module.css';
 import NFTItem from './NftItem';
-import {Metadata, Metaplex, Nft} from '@metaplex-foundation/js';
+import {useWalletContext} from '../Context';
 
 const NftDisplay: React.FC = () => {
   const {publicKey} = useWallet();
-  const [nfts, setNfts] = useState<Nft[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [hasFetched, setHasFetched] = useState<boolean>(false);
-  const [isClient, setIsClient] = useState<boolean>(false);
-
-  // Ensure that client-specific code runs only after the initial render
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const {nfts, loadingNfts, fetchNFTs} = useWalletContext();
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const nftsPerPage = 6;
 
   useEffect(() => {
-    if (isClient && publicKey) {
+    if (publicKey && nfts.length === 0) {
       fetchNFTs(publicKey);
-    } else {
-      setNfts([]);
-      setHasFetched(false);
     }
-  }, [isClient, publicKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [publicKey, nfts]);
 
-  const fetchNFTs = async (walletAddress: PublicKey) => {
-    setLoading(true);
-    const connection = new Connection(
-      process.env.NEXT_PUBLIC_BLOCKCHAIN_URL || 'https://api.devnet.solana.com'
-    );
-    const metaplex = new Metaplex(connection);
+  const indexOfLastNft = currentPage * nftsPerPage;
+  const indexOfFirstNft = indexOfLastNft - nftsPerPage;
+  const currentNfts = useMemo(
+    () => nfts.slice(indexOfFirstNft, indexOfLastNft),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [nfts, currentPage]
+  );
 
-    try {
-      const nftMetadataList = await metaplex
-        .nfts()
-        .findAllByOwner({owner: walletAddress});
-      const nfts: Nft[] = [];
-      for (const nftMetadata of nftMetadataList) {
-        const nft = await metaplex
-          .nfts()
-          .load({metadata: nftMetadata as Metadata});
-        console.log('nft:', nft);
-        nfts.push(nft as Nft);
-      }
-
-      setNfts(nfts);
-    } catch (error) {
-      console.error('Error fetching NFTs: ', error);
-      setNfts([]);
-    } finally {
-      setLoading(false);
-      setHasFetched(true);
-    }
-  };
-
-  if (!isClient) {
-    return null; // Render nothing on the server
-  }
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   return (
     <div>
       {!publicKey ? (
-        <p className={styles.message}>Click connect</p>
-      ) : loading ? (
+        <p className={styles.message}>Connect your wallet</p>
+      ) : loadingNfts ? (
         <div className={styles.loadingSpinner}>Loading...</div>
-      ) : !hasFetched || nfts.length === 0 ? (
+      ) : nfts.length === 0 ? (
         <p className={styles.message}>No NFTs</p>
       ) : (
         <div>
           <h2 className={styles.title}>Your NFTs</h2>
           <div className={styles.nftGrid}>
-            {nfts.map((nft, index) => (
+            {currentNfts.map((nft, index) => (
               <NFTItem key={index} nft={nft} />
             ))}
+          </div>
+          <div className={styles.pagination}>
+            <button
+              onClick={() => paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => paginate(currentPage + 1)}
+              disabled={currentPage * nftsPerPage >= nfts.length}
+            >
+              Next
+            </button>
           </div>
         </div>
       )}

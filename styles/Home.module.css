@@ -2,9 +2,8 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-
   text-align: left;
-  background-color: #282c34;
+  background-color: #261864;
 }
 
 .AppHeader {
@@ -48,13 +47,55 @@
   padding: 15px;
   font-size: 16px;
   border: 0;
-  font-family: "Roboto", sans-serif;
+  font-family: 'Roboto', sans-serif;
 }
 .formButton {
   margin: 10px 0 10px 0;
   padding: 15px;
   font-size: 16px;
   border: 0;
-  font-family: "Roboto", sans-serif;
+  font-family: 'Roboto', sans-serif;
 }
 
+.TabContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  color: #836fdc;
+}
+
+.TabButton {
+  padding: 10px 20px;
+  margin: 0 5px;
+  cursor: pointer;
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.TabButton:hover {
+  background-color: #e0e0e0;
+}
+
+.ActiveTab {
+  background-color: #d0d0d0;
+  font-weight: bold;
+}
+
+.balance {
+  margin-right: 15px;
+  font-size: 16px;
+  color: #e0e0e0;
+  padding: 14px 20px;
+  border-radius: 5px;
+  background-color: #4c116f;
+}
+.walletContainer {
+  display: flex;
+  align-items: center;
+}
+
+.walletContainer .wallet-adapter-button {
+  margin-right: 10px;
+}

@@ -10,17 +10,17 @@ interface NFTItemProps {
       name?: string;
       description?: string;
       uri?: string;
+      image?: string;
     };
   };
 }
 const NFTItem: React.FC<NFTItemProps> = ({nft}) => {
-  const imageUrl = nft.json?.uri || '/no-image.png';
+  const imageUrl = nft.json?.uri || nft.json?.image || '/no-image.png';
   const imageAlt = nft.json?.name || 'NFT Image';
   const imageDescription = nft.json?.description || 'No description available';
-
   const nftAddress = nft.address.toString();
   const explorerUrl = nftAddress
-    ? `https://solscan.io/token/${nftAddress}?cluster=devnet`
+    ? `https://solscan.io/token/${nftAddress}${process.env.NEXT_PUBLIC_CLUSTER}`
     : '#';
 
   return (
@@ -38,7 +38,12 @@ const NFTItem: React.FC<NFTItemProps> = ({nft}) => {
       <h3>{imageAlt}</h3>
 
       <p>{imageDescription}</p>
-      <a href={explorerUrl} target='_blank' rel='noopener noreferrer'>
+      <a
+        href={explorerUrl}
+        target='_blank'
+        rel='noopener noreferrer'
+        className={styles.link}
+      >
         <p>See on explorer</p>
       </a>
     </div>
